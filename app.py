@@ -1,6 +1,4 @@
-# FLASK APP
 import os
-import sys
 import json
 
 from flask import Flask, request, render_template
@@ -10,50 +8,57 @@ from resumeparser import ats_extractor
 from ats_analyzer import calculate_ats_score
 
 
-sys.path.insert(0, os.path.abspath(os.getcwd()))
-
-
-UPLOAD_PATH = r"__DATA__"
+UPLOAD_PATH = "__DATA__"
 
 app = Flask(__name__)
 
 
-@app.route('/')
+@app.route("/")
 def index():
-    return render_template('index.html')
+    return render_template("index.html")
 
 
 @app.route("/process", methods=["POST"])
-def ats():
+def process_resume():
 
     # -----------------------------
-    # 1. Get uploaded resume
+    # Check PDF
     # -----------------------------
-    doc = request.files.get('pdf_doc')
 
-    if not doc:
+    if "pdf_doc" not in request.files:
         return render_template(
-            'index.html',
-            error="Please upload a PDF resume."
+            "index.html",
+            error="Please upload a resume PDF."
+        )
+
+    doc = request.files["pdf_doc"]
+
+    if doc.filename == "":
+        return render_template(
+            "index.html",
+            error="Please select a PDF file."
         )
 
     # -----------------------------
-    # 2. Get Job Description
+    # Get Job Description
     # -----------------------------
+
     job_description = request.form.get(
         "job_description",
         ""
     ).strip()
 
     if not job_description:
+
         return render_template(
-            'index.html',
-            error="Please enter a Job Description."
+            "index.html",
+            error="Please enter a job description."
         )
 
     # -----------------------------
-    # 3. Save PDF
+    # Save Resume
     # -----------------------------
+
     os.makedirs(UPLOAD_PATH, exist_ok=True)
 
     doc_path = os.path.join(
@@ -64,45 +69,78 @@ def ats():
     doc.save(doc_path)
 
     # -----------------------------
-    # 4. Extract text from PDF
+    # Extract PDF Text
     # -----------------------------
+
     resume_text = _read_file_from_path(
         doc_path
     )
 
-    # -----------------------------
-    # 5. Ollama Resume Parser
-    # -----------------------------
-    parsed_data = ats_extractor(
-        resume_text
-    )
+    if not resume_text.strip():
 
-    # Convert JSON string → Python dictionary
-    try:
-        resume_data = json.loads(parsed_data)
-
-    except json.JSONDecodeError:
-
-        resume_data = {
-            "raw_response": parsed_data
-        }
+        return render_template(
+            "index.html",
+            error="Could not extract text from the PDF."
+        )
 
     # -----------------------------
-    # 6. ATS Analyzer
+    # ATS KEYWORD ANALYSIS
     # -----------------------------
+
     ats_result = calculate_ats_score(
         resume_text,
         job_description
     )
 
     # -----------------------------
-    # 7. Send everything to HTML
+    # AI RESUME PARSER
     # -----------------------------
+
+    try:
+
+        parsed_data = ats_extractor(
+            resume_text
+        )
+
+        try:
+            parsed_data = json.loads(
+                parsed_data
+            )
+
+        except json.JSONDecodeError:
+
+            parsed_data = {
+                "ai_resume_data": parsed_data
+            }
+
+    except Exception as e:
+
+        parsed_data = {
+            "ai_resume_data":
+                "AI parser error: " + str(e)
+        }
+
+    # -----------------------------
+    # Combine Results
+    # -----------------------------
+
+    final_data = {}
+
+    final_data.update(
+        ats_result
+    )
+
+    final_data.update(
+        parsed_data
+    )
+
+    # -----------------------------
+    # Send Result to HTML
+    # -----------------------------
+
     return render_template(
-        'index.html',
-        data=resume_data,
-        ats_result=ats_result,
-        job_description=job_description
+        "index.html",
+        data=final_data
     )
 
 
@@ -112,9 +150,7 @@ def _read_file_from_path(path):
 
     data = ""
 
-    for page_no in range(len(reader.pages)):
-
-        page = reader.pages[page_no]
+    for page in reader.pages:
 
         text = page.extract_text()
 

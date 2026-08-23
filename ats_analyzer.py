@@ -13,60 +13,26 @@ def extract_keywords(job_description):
     jd = normalize_text(job_description)
 
     common_skills = [
-        "python",
-        "java",
-        "javascript",
-        "typescript",
-        "c++",
-        "sql",
-        "mysql",
-        "mongodb",
-        "postgresql",
-        "html",
-        "css",
-        "react",
-        "node.js",
-        "express",
-        "flask",
-        "django",
-        "fastapi",
-        "pandas",
-        "numpy",
-        "scikit-learn",
-        "tensorflow",
-        "pytorch",
-        "machine learning",
-        "deep learning",
-        "nlp",
-        "computer vision",
-        "git",
-        "github",
-        "docker",
-        "aws",
-        "azure",
-        "gcp",
-        "linux",
-        "rest api",
-        "api",
-        "streamlit",
-        "power bi",
-        "tableau",
-        "excel"
+        "python", "java", "javascript", "typescript",
+        "c++", "sql", "mysql", "mongodb", "postgresql",
+        "html", "css", "react", "node.js", "express",
+        "flask", "django", "fastapi", "pandas", "numpy",
+        "scikit-learn", "tensorflow", "pytorch",
+        "machine learning", "deep learning", "nlp",
+        "computer vision", "git", "github", "docker",
+        "aws", "azure", "gcp", "linux", "rest api",
+        "api", "streamlit", "power bi", "tableau", "excel"
     ]
 
-    found_keywords = []
-
-    for skill in common_skills:
-        if skill in jd:
-            found_keywords.append(skill)
-
-    return found_keywords
+    return [
+        skill for skill in common_skills
+        if skill in jd
+    ]
 
 
 def calculate_keyword_match(resume_text, job_description):
 
     resume = normalize_text(resume_text)
-
     keywords = extract_keywords(job_description)
 
     if not keywords:
@@ -87,7 +53,7 @@ def calculate_keyword_match(resume_text, job_description):
             missing.append(keyword)
 
     score = round(
-        (len(matched) / len(keywords)) * 100
+        len(matched) / len(keywords) * 100
     )
 
     return {
@@ -102,31 +68,11 @@ def check_resume_sections(resume_text):
     resume = normalize_text(resume_text)
 
     sections = {
-        "education": [
-            "education",
-            "academic"
-        ],
-
-        "experience": [
-            "experience",
-            "employment",
-            "work history"
-        ],
-
-        "skills": [
-            "skills",
-            "technical skills"
-        ],
-
-        "projects": [
-            "projects",
-            "project"
-        ],
-
-        "certifications": [
-            "certification",
-            "certifications"
-        ]
+        "education": ["education", "academic"],
+        "experience": ["experience", "employment", "work history"],
+        "skills": ["skills", "technical skills"],
+        "projects": ["projects", "project"],
+        "certifications": ["certification", "certifications"]
     }
 
     found = []
@@ -134,18 +80,13 @@ def check_resume_sections(resume_text):
 
     for section, keywords in sections.items():
 
-        exists = any(
-            keyword in resume
-            for keyword in keywords
-        )
-
-        if exists:
+        if any(keyword in resume for keyword in keywords):
             found.append(section)
         else:
             missing.append(section)
 
     score = round(
-        (len(found) / len(sections)) * 100
+        len(found) / len(sections) * 100
     )
 
     return {
@@ -170,26 +111,16 @@ def calculate_ats_score(resume_text, job_description):
     section_score = section_result["score"]
 
     final_score = round(
-        (keyword_score * 0.70) +
-        (section_score * 0.30)
+        keyword_score * 0.70 +
+        section_score * 0.30
     )
 
     return {
         "ats_score": final_score,
-
         "keyword_match": keyword_score,
-
         "resume_structure": section_score,
-
-        "matched_keywords":
-            keyword_result["matched"],
-
-        "missing_keywords":
-            keyword_result["missing"],
-
-        "sections_found":
-            section_result["found"],
-
-        "sections_missing":
-            section_result["missing"]
+        "matched_keywords": keyword_result["matched"],
+        "missing_keywords": keyword_result["missing"],
+        "sections_found": section_result["found"],
+        "sections_missing": section_result["missing"]
     }
