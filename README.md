@@ -1,28 +1,27 @@
 # AI-POWERED RESUME APPLICANT TRACKING SYSTEM ANALYZER
 
-An AI-powered **APPLICANT TRACKING SYSTEM (ATS)** that analyzes resumes against job descriptions and helps candidates understand how well their resume matches a target role.
+An AI-powered **APPLICANT TRACKING SYSTEM (ATS)** that analyzes resumes and helps job seekers understand how well their resume matches a target job description.
 
 ## 🚀 Features
 
 - 📄 Resume PDF Parsing
-- 📝 Job Description Analysis
-- 🎯 ATS Compatibility Score
-- 🔍 Matching Skills & Keywords
-- ⚠️ Missing Skills & Keywords
-- 🤖 AI-Powered Resume Improvement Suggestions
-- 📊 Resume Analysis
+- 📝 Resume Information Extraction
+- 🎯 ATS-Focused Resume Analysis
+- 🔍 Skills and Keyword Analysis
+- 🤖 AI-Based Resume Analysis
+- 📊 Structured Resume Results
 
 ## 🔄 How It Works
 
 ```text
-Resume PDF + Job Description
-            ↓
-      Resume Parsing
-            ↓
-    Skills & Keyword Extraction
-            ↓
-       ATS Comparison
-            ↓
-    ATS Score & Analysis
-            ↓
- Missing Keywords + Suggestions
+Resume PDF
+    ↓
+Resume Text Extraction
+    ↓
+Resume Parsing
+    ↓
+Skills & Information Extraction
+    ↓
+ATS Analysis
+    ↓
+Resume Insights & Suggestions
